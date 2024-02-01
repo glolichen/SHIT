@@ -32,8 +32,21 @@
 			</div>
 		</div>
 		<script>
-			let files = JSON.parse({{ images | tojson }});
-			console.log(files);
+			var imageList = JSON.parse({{ images | tojson }});
+			
+			var session = null;
+			var cookies = document.cookie.split(";");
+			for (var cookie of cookies) {
+				cookie = cookie.split("=");
+				console.log(cookie);
+				if (cookie[0].trim() == "sessionID") {
+					session = cookie[1];
+					break;
+				}
+			}
+
+			if (session == null)
+				window.open("/", "_self")
 		</script>
 		<script src="/static/labelscripts.js"></script>
 	</body>

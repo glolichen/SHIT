@@ -67,7 +67,10 @@ imageContainer.addEventListener("mousemove", event => {
 	ctx.strokeStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${STROKE_ALPHA})`;
 	ctx.strokeRect(startX, startY, x - startX, y - startY);
 });
-imageContainer.addEventListener("mouseup", event => {
+this.addEventListener("mouseup", event => {
+	if (!mouseDown)
+		return;
+	
 	const ctx1 = tempCanvas.getContext("2d");
 	ctx1.clearRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
 
@@ -107,26 +110,21 @@ undoButton.onclick = function() {
 	undo();
 }
 
-const NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-this.addEventListener("keypress", event => {
-	let num = NUMBERS.indexOf(event.key)
-	if (num != -1) {
-		objects = num;
-		setObjectsButton(objects);
-		return;
-	}
-	if (event.key == "u")
-		undo();
-});
 
-var filename = "0009_png.rf.1dc9bfbe681d3e0ed0087d03185238d3.jpg";
+var imageNum = 0;
 
-saveButton.onclick = () => {
-	const filename = "file.xml";
+function save() {
+	boxes = [];
+	let canvases = imageContainer.getElementsByTagName("canvas");
+	for (let i = 0; i < canvases.length; i++)
+		canvases[0].outerHTML = "";
 
-	var element = document.createElement("a");
-	var text = '<?xml version="1.0" ?>\n<annotation>\n';
-	text += `\t<filename>${filename}</filename>\n\t<size>\n`;
+	const filename = imageList[imageNum].split(".jpg")[0] + ".xml";
+	let shrinkRatio = image.naturalHeight / image.clientHeight;
+
+	let element = document.createElement("a");
+	let text = '<?xml version="1.0" ?>\n<annotation>\n';
+	text += `\t<filename>${imageList[imageNum]}</filename>\n\t<size>\n`;
 	text += `\t\t<width>${image.naturalWidth}</width>\n`;
 	text += `\t\t<height>${image.naturalHeight}</height>\n`;
 	text += "\t\t<depth>3</depth>\n";
@@ -138,10 +136,10 @@ saveButton.onclick = () => {
 		text += "\t\t<truncated>0</truncated>\n";
 		text += "\t\t<difficult>0</difficult>\n";
 		text += "\t\t<bndbox>\n";
-		text += `\t\t\t<xmin>${box.minX - image.offsetLeft}</xmin>\n`;
-		text += `\t\t\t<xmax>${box.maxX - image.offsetLeft}</xmax>\n`;
-		text += `\t\t\t<ymin>${box.minY - image.offsetTop}</ymin>\n`;
-		text += `\t\t\t<ymax>${box.maxY - image.offsetTop}</ymax>\n`;
+		text += `\t\t\t<xmin>${Math.round((box.minX - image.offsetLeft) * shrinkRatio)}</xmin>\n`;
+		text += `\t\t\t<xmax>${Math.round((box.maxX - image.offsetLeft) * shrinkRatio)}</xmax>\n`;
+		text += `\t\t\t<ymin>${Math.round((box.minY - image.offsetTop) * shrinkRatio)}</ymin>\n`;
+		text += `\t\t\t<ymax>${Math.round((box.maxY - image.offsetTop) * shrinkRatio)}</ymax>\n`;
 		text += "\t\t</bndbox>\n";
 		text += "\t</object>\n"
 	}
@@ -157,7 +155,29 @@ saveButton.onclick = () => {
 	element.click();
 
 	document.body.removeChild(element);
+
+	imageNum++;
+	// nextImage();
 }
 
-image.src = "/static/images/th6EE-SfM4CvwD3nAUbzo8lUgF_ancLIHTaSpi0GGF63FSID9uy9SS84lUdrq23b6uWtJDSTsoqcTDS36BPM9g5XZGYymzM4RAmX/" + filename
-image.style.height = (PAGE_HEIGHT - image.offsetTop - 10) + "px";
+saveButton.onclick = () => {
+	save();
+}
+
+this.addEventListener("keypress", event => {
+	switch (event.key) {
+		case "u":
+			undo();
+			break;
+		case "Enter":
+			save();
+			break;
+	}
+});
+
+function nextImage() {
+	image.src = `/static/images/${session}/${imageList[imageNum]}`;
+	image.style.height = (PAGE_HEIGHT - image.offsetTop - 10) + "px";
+}
+
+nextImage();

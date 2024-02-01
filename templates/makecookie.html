@@ -12,7 +12,8 @@
 		<script>
 			let sessionID = "{{ session }}";
 			let created = "{{ created }}";
-			document.cookie = `sessionID=${sessionID};created=${created};`;
+			document.cookie = `sessionID=${sessionID};`;
+			document.cookie = `created=${created};`;
 			document.getElementById("sessionID").value = sessionID;
 			document.getElementById("created").value = created;
 			form.submit();
