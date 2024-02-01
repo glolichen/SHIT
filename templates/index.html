@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SHIT - System for the Hallmarking of Images to Text</title>
+		<link rel="stylesheet" href='/static/style.css' />
+	</head>
+	<body>
+		<div class="center">
+			<h1>Welcome to
+				<div class="tooltip">
+					SHIT
+					<span class="tooltiptext">System for the Hallmarking of Images to Text</span>
+				</div>!
+			</h1>
+			<form id="form" method="POST" action="/" enctype="multipart/form-data">
+				<label for="file">Select JPG images to label: </label><br>
+				<input name="file" type="file" multiple="multiple" accept="image/jpeg"><br>
+				<button onclick="func()">Submit</button>
+			</form>
+		</div>
+		<script>
+			function func() {
+				alert("\
+Our your files are uploaded to the server, you will begin labeling the images. \
+If you do not enter the website for a period of 7 days they will be deleted, \
+but entering the website will restart this period. Use the number keys to enter the number of objects. \
+If the number is more than 9, edit it in the input box. Then drag boxes around the object to label it. \
+The label files will be saved in Pascal VOC format in your Downloads folder each time you label a picture.");
+			}
+		</script>
+	</body>
+</html>

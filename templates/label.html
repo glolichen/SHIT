@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SHIT - System for the Hallmarking of Images to Text</title>
+		<link rel="stylesheet" href='/static/style.css' />
+	</head>
+	<body>
+		<!-- <canvas id="canvas"></canvas> -->
+		<div class="horizontalcenter">
+			<div id="buttonpanel">
+				<button id="save" class="tooltip">
+					Save
+					<span class="tooltiptext">Delete viewed images from server so that you are not presented with them again</span>
+				</button>
+				<button id="undo" class="tooltip">
+					Undo
+					<span class="tooltiptext">Delete the last drawn box.</span>
+				</button>
+				<button id="next" class="tooltip">
+					Next
+					<span class="tooltiptext">Save XML file for current image and move onto the next one.</span>
+				</button>
+				<button id="guide" class="tooltip">
+					Shortcut Guide
+					<span class="tooltiptext">Press here for a list of keyboard shortcuts.</span>
+				</button>
+			</div>
+			<br>
+			<div id="imagecontainer">
+				<canvas id="tempcanvas"></canvas>
+				<img id="image" draggable="false">
+			</div>
+		</div>
+		<script>
+			let files = JSON.parse({{ images | tojson }});
+			console.log(files);
+		</script>
+		<script src="/static/labelscripts.js"></script>
+	</body>
+</html>
