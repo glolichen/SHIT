@@ -110,19 +110,15 @@ undoButton.onclick = function() {
 	undo();
 }
 
-
 var imageNum = 0;
 
-function save() {
-	boxes = [];
-	let canvases = imageContainer.getElementsByTagName("canvas");
-	for (let i = 0; i < canvases.length; i++)
-		canvases[0].outerHTML = "";
-
+function completed() {
 	const filename = imageList[imageNum].split(".jpg")[0] + ".xml";
 	let shrinkRatio = image.naturalHeight / image.clientHeight;
 
 	let element = document.createElement("a");
+	element.className = "filedownload";
+	
 	let text = '<?xml version="1.0" ?>\n<annotation>\n';
 	text += `\t<filename>${imageList[imageNum]}</filename>\n\t<size>\n`;
 	text += `\t\t<width>${image.naturalWidth}</width>\n`;
@@ -152,12 +148,41 @@ function save() {
 	element.style.display = "none";
 	document.body.appendChild(element);
 
-	element.click();
-
-	document.body.removeChild(element);
+	completedImages.push(imageList[imageNum]);
 
 	imageNum++;
-	// nextImage();
+	nextImage();
+ 
+	boxes = [];
+
+	let canvases = imageContainer.getElementsByTagName("canvas");
+	console.log(canvases);
+	for (let i = canvases.length - 1; i >= 0; i--) {
+		if (canvases[i].id != "tempcanvas")
+			canvases[i].outerHTML = "";
+	}
+}
+
+nextButton.onclick = () => {
+	completed();
+}
+
+let completedImages = [];
+function save() {
+	let elements = document.getElementsByClassName("filedownload");
+	for (let i = elements.length - 1; i >= 0; i--) {
+		elements[i].click();
+		document.body.removeChild(elements[i]);
+	}
+	let xhr = new XMLHttpRequest();
+	xhr.open("POST", "/save", false);
+	xhr.onreadystatechange = () => {
+		if (xhr.status == 200 && xhr.responseText != "") {
+			imageList = JSON.parse(xhr.responseText);
+			nextImage();
+		}
+	}
+	xhr.send(JSON.stringify({ "session": session, "completed": completedImages }));
 }
 
 saveButton.onclick = () => {
@@ -170,14 +195,30 @@ this.addEventListener("keypress", event => {
 			undo();
 			break;
 		case "Enter":
+			completed();
+			break;
+		case "s":
 			save();
 			break;
 	}
 });
 
 function nextImage() {
+	if (imageNum == imageList.length) {
+		save();
+		alert("Labeling complete! Press OK to return to home screen");
+		window.open("/", "_self");
+	}
 	image.src = `/static/images/${session}/${imageList[imageNum]}`;
 	image.style.height = (PAGE_HEIGHT - image.offsetTop - 10) + "px";
 }
 
-nextImage();
+var xhr = new XMLHttpRequest();
+xhr.open("POST", "/imageList", false);
+xhr.onreadystatechange = () => {
+	if (xhr.status == 200 && xhr.responseText != "") {
+		imageList = JSON.parse(xhr.responseText);
+		nextImage();
+	}
+}
+xhr.send(session);

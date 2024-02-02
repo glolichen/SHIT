@@ -1,5 +1,15 @@
+@font-face {
+	font-family: cmu;
+	src: url("/static/cmu.ttf");
+}
+
+body {
+	font-family: cmu;
+	font-size: larger;
+}
+
 .hidden {
-	display:none
+	display: none;
 }
 
 /* https://www.w3schools.com/css/css_tooltip.asp */
@@ -9,7 +19,9 @@
 	border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
 .tooltip .tooltiptext {
-	font-size: small;
+	font-family: cmu;
+	font-size: medium;
+	font-weight: bold;
 	visibility: hidden;
 	width: 120px;
 	background-color: black;

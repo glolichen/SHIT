@@ -10,7 +10,7 @@
 			<div id="buttonpanel">
 				<button id="save" class="tooltip">
 					Save
-					<span class="tooltiptext">Delete viewed images from server so that you are not presented with them again</span>
+					<span class="tooltiptext">Download XML files for labeled images and delete them from the server so that you are not presented with them again</span>
 				</button>
 				<button id="undo" class="tooltip">
 					Undo
@@ -18,7 +18,7 @@
 				</button>
 				<button id="next" class="tooltip">
 					Next
-					<span class="tooltiptext">Save XML file for current image and move onto the next one.</span>
+					<span class="tooltiptext">Move on to next image.</span>
 				</button>
 				<button id="guide" class="tooltip">
 					Shortcut Guide
@@ -31,23 +31,7 @@
 				<img id="image" draggable="false">
 			</div>
 		</div>
-		<script>
-			var imageList = JSON.parse({{ images | tojson }});
-			
-			var session = null;
-			var cookies = document.cookie.split(";");
-			for (var cookie of cookies) {
-				cookie = cookie.split("=");
-				console.log(cookie);
-				if (cookie[0].trim() == "sessionID") {
-					session = cookie[1];
-					break;
-				}
-			}
-
-			if (session == null)
-				window.open("/", "_self")
-		</script>
+		<script src="/static/cookieCheck.js"></script>
 		<script src="/static/labelscripts.js"></script>
 	</body>
 </html>

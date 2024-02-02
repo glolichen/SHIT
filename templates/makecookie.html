@@ -5,18 +5,12 @@
 		<link rel="stylesheet" href='/static/style.css' />
 	</head>
 	<body>
-		<form id="form" action="{{ url_for('label') }}" method="post" class="hidden">
-			<input name="sessionID" id="sessionID" type="text">
-			<input name="created" id="created" type="text">
-		</form>
 		<script>
 			let sessionID = "{{ session }}";
-			let created = "{{ created }}";
+			let createdTime = "{{ created }}";
 			document.cookie = `sessionID=${sessionID};`;
-			document.cookie = `created=${created};`;
-			document.getElementById("sessionID").value = sessionID;
-			document.getElementById("created").value = created;
-			form.submit();
+			document.cookie = `created=${createdTime};`;
 		</script>
+		<script src="/static/cookieCheck.js"></script>
 	</body>
 </html>

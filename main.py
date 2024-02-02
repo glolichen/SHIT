@@ -30,15 +30,43 @@ def home():
 	created = round(time.time())
 	return flask.render_template("makecookie.html", session=sessionID, created=created)
 
-@app.route("/label", methods=["POST"])
-def label():
-	session = flask.request.form["sessionID"]
-	created = int(flask.request.form["created"])
-	current = round(time.time())
-	if (current - created >= 604800):
-		return "you will be deleted"
+@app.route("/imageList", methods=["POST"])
+def imageList():
+	session = flask.request.data.decode("ascii")
+	sessionList = os.listdir("static/images")
+	if session not in sessionList:
+		return json.dumps([])
 	images = os.listdir(os.path.join("static", "images", session))
-	return flask.render_template("label.html", images=json.dumps(images))
+	return json.dumps(images)
+
+@app.route("/label", methods=["GET"])
+def label():
+	return flask.render_template("label.html")
+
+@app.route("/verifyCookie", methods=["POST"])
+def verifyCookie():
+	data = json.loads(flask.request.data.decode("ascii"))
+
+	session = data["session"]
+	created = int(data["created"])
+
+	sessionList = os.listdir("static/images")
+	current = round(time.time())
+	
+	if session not in sessionList:
+		return "/"
+	if current - created >= 604800:
+		return "/"
+
+	return "/label"
+
+@app.route("/save", methods=["POST"])
+def save():
+	data = json.loads(flask.request.data.decode("ascii"))
+	session = data["session"]
+	completed = data["completed"]
+	print(session, completed)
+	return ""
 
 if __name__ == '__main__':  
-	app.run()
+	app.run(port=8080)
