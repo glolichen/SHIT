@@ -8,9 +8,9 @@
 		<script>
 			let sessionID = "{{ session }}";
 			let createdTime = "{{ created }}";
-			document.cookie = `sessionID=${sessionID};`;
+			document.cookie = `session=${sessionID};`;
 			document.cookie = `created=${createdTime};`;
 		</script>
-		<script src="/static/cookieCheck.js"></script>
+		<script src="/static/cookiecheck.js"></script>
 	</body>
 </html>

@@ -176,12 +176,6 @@ function save() {
 	}
 	let xhr = new XMLHttpRequest();
 	xhr.open("POST", "/save", false);
-	xhr.onreadystatechange = () => {
-		if (xhr.status == 200 && xhr.responseText != "") {
-			imageList = JSON.parse(xhr.responseText);
-			nextImage();
-		}
-	}
 	xhr.send(JSON.stringify({ "session": session, "completed": completedImages }));
 }
 
@@ -206,11 +200,24 @@ this.addEventListener("keypress", event => {
 function nextImage() {
 	if (imageNum == imageList.length) {
 		save();
-		alert("Labeling complete! Press OK to return to home screen");
-		window.open("/", "_self");
+		let xhr = new XMLHttpRequest();
+		xhr.open("POST", "/clear", false);
+		xhr.onreadystatechange = () => {
+			if (xhr.status == 200) {
+				document.cookie = "";
+				alert("Labeling complete! Press OK to return to home screen");
+				window.open("/", "_self");
+			}
+		}
+		xhr.send(session);
+		return;
 	}
 	image.src = `/static/images/${session}/${imageList[imageNum]}`;
 	image.style.height = (PAGE_HEIGHT - image.offsetTop - 10) + "px";
+}
+
+window.onbeforeunload = () => {
+	return "a";
 }
 
 var xhr = new XMLHttpRequest();
@@ -222,3 +229,4 @@ xhr.onreadystatechange = () => {
 	}
 }
 xhr.send(session);
+
