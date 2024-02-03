@@ -205,6 +205,7 @@ function nextImage() {
 		xhr.onreadystatechange = () => {
 			if (xhr.status == 200) {
 				document.cookie = "";
+				window.onbeforeunload = () => {}
 				alert("Labeling complete! Press OK to return to home screen");
 				window.open("/", "_self");
 			}
