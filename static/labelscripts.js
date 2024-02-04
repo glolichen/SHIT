@@ -28,8 +28,6 @@ const FILL_ALPHA1 = 0.15;
 const FILL_ALPHA2 = 0.3;
 const STROKE_ALPHA = 0.8;
 
-var selected = 0;
-
 tempCanvas.width = PAGE_WIDTH;
 tempCanvas.height = PAGE_HEIGHT;
 
@@ -51,6 +49,28 @@ imageContainer.addEventListener("mousedown", event => {
 		y < image.offsetTop || y > image.offsetTop + image.offsetHeight)
 		return;
 
+	if (event.buttons == 2) {
+		let oldLength = boxes.length;
+		for (let i = boxes.length - 1; i >= 0; i--) {
+			let box = boxes[i];
+			if (box.minX < x && x < box.maxX && box.minY < y && y < box.maxY) {
+				console.log(box);
+				boxes.splice(i, 1);
+				document.getElementById("box" + i).outerHTML = "";
+			}
+		}
+
+		let curIndex = 0;
+		for (let i = 0; i < oldLength; i++) {
+			let element = document.getElementById("box" + i);
+			if (element == null)
+				continue;
+			element.id = "box" + curIndex;
+			curIndex++;
+		}
+		return;
+	}
+
 	startX = x, startY = y;
 	mouseDown = true;
 });
@@ -71,6 +91,17 @@ imageContainer.addEventListener("mousemove", event => {
 	ctx.strokeStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${STROKE_ALPHA})`;
 	ctx.strokeRect(startX, startY, x - startX, y - startY);
 });
+
+function addBox(ctx, x1, y1, x2, y2) {
+	ctx.fillStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${FILL_ALPHA2})`;
+	ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${STROKE_ALPHA})`;
+	ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+	boxes.push(new Box(x1, y1, x2, y2));
+}
 this.addEventListener("mouseup", event => {
 	if (!mouseDown)
 		return;
@@ -79,26 +110,17 @@ this.addEventListener("mouseup", event => {
 	ctx1.clearRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
 
 	const canvas = document.createElement("canvas");
-	canvas.id = "box" + selected;
+	canvas.id = "box" + boxes.length;
 	canvas.width = PAGE_WIDTH;
 	canvas.height = PAGE_HEIGHT;
 
 	imageContainer.appendChild(canvas);
 
-	const ctx2 = canvas.getContext("2d");
-
 	endX = clamp(event.clientX, image.offsetLeft, image.offsetLeft + image.offsetWidth);
 	endY = clamp(event.clientY, image.offsetTop, image.offsetTop + image.offsetHeight);
-	
-	ctx2.fillStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${FILL_ALPHA2})`;
-	ctx2.fillRect(startX, startY, endX - startX, endY - startY);
 
-	ctx2.lineWidth = 2;
-	ctx2.strokeStyle = `rgba(${RED}, ${GREEN}, ${BLUE}, ${STROKE_ALPHA})`;
-	ctx2.strokeRect(startX, startY, endX - startX, endY - startY);
-
-	boxes.push(new Box(startX, startY, endX, endY));
-	selected++;
+	const ctx2 = canvas.getContext("2d");
+	addBox(ctx2, startX, startY, endX, endY);
 
 	mouseDown = false;
 });
@@ -108,7 +130,6 @@ function undo() {
 		return;
 	boxes = boxes.slice(0, -1);
 	document.getElementById("box" + boxes.length).outerHTML = "";
-	selected--;
 }
 undoButton.onclick = function() {
 	undo();
@@ -240,7 +261,23 @@ function autoLabel() {
 				alert(response);
 				return;
 			}
-			console.log(xhr.responseText);
+			let scale = image.clientHeight / image.naturalHeight;
+			let detected = JSON.parse(xhr.responseText);
+			for (let i = 0; i < detected.length; i++) {
+				let box = detected[i];
+				console.log(box);
+
+				const canvas = document.createElement("canvas");
+				canvas.id = "box" + boxes.length;
+				canvas.width = PAGE_WIDTH;
+				canvas.height = PAGE_HEIGHT;
+
+				imageContainer.appendChild(canvas);
+
+				const ctx = canvas.getContext("2d");
+				addBox(ctx, box.xmin * scale + image.offsetLeft, box.ymin * scale + image.offsetTop,
+					box.xmax * scale + image.offsetLeft, box.ymax * scale + image.offsetTop);
+			}
 		}
 	}
 	xhr.send(JSON.stringify({ "session": session, "imagename": imageList[imageNum] }));
