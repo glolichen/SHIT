@@ -20,11 +20,17 @@
 					Next
 					<span class="tooltiptext">Move on to next image.</span>
 				</button>
-				<button id="guide" class="tooltip">
-					Shortcut Guide
-					<span class="tooltiptext">Press here for a list of keyboard shortcuts.</span>
+				<button id="upload" class="tooltip">
+					Upload model
+					<span class="tooltiptext">Upload a model.</span>
 				</button>
 			</div>
+			<dialog id="dialog">
+				<form id="tfliteupload" method="POST" enctype="multipart/form-data">
+					<input id="uploadinput" name="file" type="file" accept=".tflite">
+				</form>
+				<button id="formsubmit">Submit</button>
+			</dialog>			  
 			<br>
 			<div id="imagecontainer">
 				<canvas id="tempcanvas"></canvas>

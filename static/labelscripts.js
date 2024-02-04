@@ -10,6 +10,10 @@ class Box {
 const saveButton = document.getElementById("save");
 const undoButton = document.getElementById("undo");
 const nextButton = document.getElementById("next");
+const uploadButton = document.getElementById("upload");
+
+const submitButton = document.getElementById("formsubmit");
+
 const image = document.getElementById("image");
 const imageContainer = document.getElementById("imagecontainer");
 const tempCanvas = document.getElementById("tempcanvas");
@@ -183,20 +187,6 @@ saveButton.onclick = () => {
 	save();
 }
 
-this.addEventListener("keypress", event => {
-	switch (event.key) {
-		case "u":
-			undo();
-			break;
-		case "Enter":
-			completed();
-			break;
-		case "s":
-			save();
-			break;
-	}
-});
-
 function nextImage() {
 	if (imageNum == imageList.length) {
 		save();
@@ -220,6 +210,58 @@ function nextImage() {
 window.onbeforeunload = () => {
 	return "a";
 }
+
+uploadButton.onclick = () => {
+	document.getElementById("dialog").setAttribute("open", true);
+}
+
+submitButton.onclick = () => {
+	let files = document.getElementById("uploadinput").files;
+	let formData = new FormData();
+	formData.append("file", files[0]);
+	formData.append("session", session);
+	
+	uploadDone = false;
+	let xhr = new XMLHttpRequest();
+	xhr.open("POST", "uploadmodel");
+	xhr.send(formData);
+	document.getElementById("tfliteupload").reset();
+	document.getElementById("dialog").removeAttribute("open");
+}
+
+const ERRORS = ["no uploaded model", "no such image", "bad model, upload another one"];
+function autoLabel() {
+	let xhr = new XMLHttpRequest();
+	xhr.open("POST", "/aidetect", false);
+	xhr.onreadystatechange = () => {
+		if (xhr.status == 200) {
+			let response = xhr.responseText;
+			if (ERRORS.indexOf(response) != -1) {
+				alert(response);
+				return;
+			}
+			console.log(xhr.responseText);
+		}
+	}
+	xhr.send(JSON.stringify({ "session": session, "imagename": imageList[imageNum] }));
+}
+
+this.addEventListener("keypress", event => {
+	switch (event.key) {
+		case "u":
+			undo();
+			break;
+		case "Enter":
+			completed();
+			break;
+		case "s":
+			save();
+			break;
+		case "a":
+			autoLabel()
+			break;
+	}
+});
 
 var xhr = new XMLHttpRequest();
 xhr.open("POST", "/imageList", false);

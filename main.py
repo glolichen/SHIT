@@ -4,6 +4,7 @@ import json
 import random
 import time
 from werkzeug.utils import secure_filename
+import detect
 
 app = flask.Flask(__name__)
 
@@ -79,7 +80,50 @@ def clear():
 	dirList = os.listdir(os.path.join("static", "images"))
 	if session in dirList:
 		os.rmdir(os.path.join("static", "images", session))
+	os.remove(os.path.join("static", "models", session + ".tflite"))
 	return ""
 
+@app.route("/uploadmodel", methods=["POST"])
+def uploadmodel():
+	files = flask.request.files.getlist("file")
+	session = flask.request.form["session"]
+	for file in files:
+		filename = os.path.join("static", "models", session + ".tflite")
+		file.save(filename)
+	
+	return ""
+
+
+@app.route("/aidetect", methods=["POST"])
+def aidetect():
+	data = json.loads(flask.request.data.decode("ascii"))
+	session = secure_filename(data["session"])
+	imageName = secure_filename(data["imagename"])
+
+	imageList = os.listdir(os.path.join("static", "images", session))
+	modelList = os.listdir(os.path.join("static", "models"))
+
+	if (session + ".tflite") not in modelList:
+		return "no uploaded model"
+	if imageName not in imageList:
+		return "no such image"
+
+	try:
+		notes = detect.get_detections(os.path.join("static", "images", session, imageName), os.path.join("static", "models", session + ".tflite"))
+	except:
+		return "bad model, upload another one"
+
+	detections = []
+	for note in notes:
+		detections.append({
+			"class": note[0],
+			"conf": int(round(note[1] * 100)),
+			"xmin": note[2],
+			"ymin": note[3],
+			"xmax": note[4],
+			"ymax": note[5],
+		})
+	return json.dumps(detections)
+
 if __name__ == '__main__':  
-	app.run(port=8080)
+	app.run(port=5000)
