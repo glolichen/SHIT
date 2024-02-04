@@ -11,6 +11,7 @@ const saveButton = document.getElementById("save");
 const undoButton = document.getElementById("undo");
 const nextButton = document.getElementById("next");
 const uploadButton = document.getElementById("upload");
+const autoLabelButton = document.getElementById("autolabel");
 
 const submitButton = document.getElementById("formsubmit");
 
@@ -27,6 +28,14 @@ const BLUE = 246;
 const FILL_ALPHA1 = 0.15;
 const FILL_ALPHA2 = 0.3;
 const STROKE_ALPHA = 0.8;
+
+var alwaysAutoLabel = false;
+
+autoLabelButton.onclick = () => {
+	alwaysAutoLabel = !alwaysAutoLabel;
+	let tooltipText = "<" + autoLabelButton.innerHTML.split("<")[1];
+	autoLabelButton.innerHTML = `Autolabel: ${alwaysAutoLabel ? "On" : "Off"}` + tooltipText;
+}
 
 tempCanvas.width = PAGE_WIDTH;
 tempCanvas.height = PAGE_HEIGHT;
@@ -186,6 +195,9 @@ function completed() {
 		if (canvases[i].id != "tempcanvas")
 			canvases[i].outerHTML = "";
 	}
+
+	if (alwaysAutoLabel)
+		autoLabel();
 }
 
 nextButton.onclick = () => {
